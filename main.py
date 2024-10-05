@@ -132,6 +132,7 @@ def process_user_feed(xml_content):
             'categories': categories
         })
 
+    print(f"Keyword index contains {len(keyword_index)} unique keywords")
     return processed_articles, keyword_index, data_for_infrastructure
 
 def main():
@@ -153,48 +154,41 @@ def main():
     processed_articles, keyword_index, data_for_infrastructure = process_user_feed(xml_content)
 
     print(f"Processed {len(processed_articles)} articles")
+    print(f"Number of unique keywords: {len(keyword_index)}")
 
-    # Display processed articles
-    for i, article in enumerate(processed_articles, 1):
-        print(f"\nArticle {i}:")
-        print(f"Title: {article['title']}")
-        print(f"Summary: {article['summary']}")
-        print(f"Categories: {', '.join(article['categories'])}")
-        print(f"Keywords: {', '.join(article['keywords'])}")
-        print(f"URL: {article['url']}")
-
-    print("\nData ready for infrastructure team:", data_for_infrastructure)
-    
     # Interactive Keyword Selection
     while True:
         print("\nAvailable Keywords:")
         sorted_keywords = sorted(keyword_index.keys())
         for idx, keyword in enumerate(sorted_keywords, 1):
-            print(f"{idx}. {keyword}")
+            print(f"{idx}. {keyword} ({len(keyword_index[keyword])} articles)")
         print("0. Exit")
 
         try:
-            choice = int(input("\nSelect a keyword by number: "))
+            choice = input("\nSelect a keyword by number (or 0 to exit): ")
+            if choice.lower() == 'exit' or choice == '0':
+                print("Exiting.")
+                break
+            
+            choice = int(choice)
+            if 1 <= choice <= len(sorted_keywords):
+                selected_keyword = sorted_keywords[choice - 1]
+                relevant_articles = keyword_index[selected_keyword]
+                print(f"\nArticles related to '{selected_keyword}':")
+                if relevant_articles:
+                    for article in relevant_articles:
+                        print(f"\nTitle: {article['title']}")
+                        print(f"Summary: {article['summary']}")
+                        print(f"URL: {article['url']}")
+                else:
+                    print("No articles found for this keyword.")
+            else:
+                print("Choice out of range. Please try again.")
         except ValueError:
             print("Invalid input. Please enter a number.")
-            continue
-
-        if choice == 0:
-            print("Exiting.")
-            break
-        elif 1 <= choice <= len(sorted_keywords):
-            selected_keyword = sorted_keywords[choice - 1]
-            relevant_articles = keyword_index[selected_keyword]
-            print(f"\nArticles related to '{selected_keyword}':")
-            for article in relevant_articles:
-                print(f"\nTitle: {article['title']}")
-                print(f"Summary: {article['summary']}")
-                print(f"URL: {article['url']}")
-        else:
-            print("Choice out of range. Please try again.")
+        
+        print("\nPress Enter to continue...")
+        input()
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == 'test':
-        unittest.main(argv=['first-arg-is-ignored'], exit=False)
-    else:
-        main()
+    main()
