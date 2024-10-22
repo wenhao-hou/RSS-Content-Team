@@ -1,0 +1,7 @@
+requests
+python-dotenv
+pytest==8.3.3
+beautifulsoup4
+feedparser
+googletrans==3.1.0a0
+nltk
